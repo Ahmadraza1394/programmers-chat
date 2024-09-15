@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Socket.IO Chat</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+    <style>
+      body {
+        background-color: #1a1a1a;
+        color: #fff;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .chat-container {
+        width: 100%;
+        max-width: 700px;
+        background-color: #2a2a2a;
+        border-radius: 10px;
+        margin: auto;
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        /* scrollbar-width: none; */
+        scroll-behavior: smooth;
+
+        scrollbar-color: #00bcd4 transparent;
+      }
+      .chat-container h4 {
+        color: #00bcd4;
+        text-align: center;
+        margin-bottom: 20px;
+        font-weight: 600;
+      }
+      .messages {
+        list-style-type: none;
+        padding: 0;
+        height: 300px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        background-color: #1a1a1a;
+        padding: 10px;
+        border: 1px solid #333;
+      }
+      .messages li {
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 20px;
+        max-width: 70%;
+        word-wrap: break-word;
+      }
+      .messages li:nth-child(odd) {
+        background-color: #21b3e4;
+        color: white;
+        margin-left: auto;
+        text-align: right;
+      }
+      .messages li:nth-child(even) {
+        background-color: #444;
+        color: #ddd;
+        text-align: left;
+      }
+      #m {
+        background-color: #333;
+        border: none;
+        border-radius: 20px;
+        padding: 10px 20px;
+        color: #fff;
+      }
+      #sendBtn {
+        background-color: #00bcd4;
+        border: none;
+        padding: 10px;
+        border-radius: 20px;
+        width: 100%;
+        color: #fff;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+      }
+      #sendBtn:hover {
+        background-color: #0097a7;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="chat-container">
+        <h4>Socket.IO Chat</h4>
+
+        <!-- Messages List -->
+        <ul id="message" class="messages"></ul>
+
+        <!-- Chat Input Form -->
+        <form action="" id="chatForm">
+          <div class="row no-gutters">
+            <div class="col-9 pr-2">
+              <input
+                id="m"
+                autocomplete="off"
+                type="text"
+                class="form-control"
+                placeholder="Type your message..."
+              />
+            </div>
+            <div class="col-3">
+              <button id="sendBtn" type="submit" class="btn">Send</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      // making room
+      const room = "javaScript";
+      // creates a WebSocket connection with the server using Socket.IO.
+      const socket = io("/tech");
+
+      // Emit message when form is submitted
+      $("form").submit(function (e) {
+        // e.preventDefault();
+
+        const msg = $("#m").val();
+        // sends the message to the server
+        socket.emit("message", { msg, room });
+        $("#m").val(""); // Clear input
+        return false;
+      });
+
+      // Listens for incoming messages from the server.
+      socket.on("message", (msg) => {
+        $("#message").append($("<li>").text(msg));
+        const messageList = document.querySelector(".messages");
+        messageList.scrollTop = messageList.scrollHeight; // Auto-scroll to the latest message
+      });
+
+      // Executes when the user connects to the server.
+      socket.on("connect", () => {
+        socket.emit("join", { room }); //emit message when new user connect
+      });
+    </script>
+  </body>
+</html>
